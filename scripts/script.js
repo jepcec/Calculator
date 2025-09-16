@@ -7,7 +7,9 @@ const res = document.getElementById("result");
 const toast = document.getElementById("toast");
 
 function calculate(value) {
-  const calculatedValue = eval(value || null);
+  const sanitizedValue = value.replace(/\^/g, "**");
+  const calculatedValue = eval(sanitizedValue || null);
+
   if (isNaN(calculatedValue)) {
     res.value = "Can't divide 0 with 0";
     setTimeout(() => {
@@ -87,6 +89,8 @@ function keyboardInputHandler(e) {
     res.value += "*";
   } else if (e.key === "/") {
     res.value += "/";
+  } else if (e.key === "^") {
+    res.value += "^";
   }
 
   //decimal key
