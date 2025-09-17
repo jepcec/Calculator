@@ -30,7 +30,7 @@
         </div>
       </div>
       <div class="first-row">
-        <input type="text" name="result" id="result" placeholder="Result" readonly />
+  <input type="text" name="result" id="result" placeholder="Result" autocomplete="off" />
         <input type="button" value="C" onclick="result.value=''" id="clear-button" />
       </div>
       <div class="second-row">
@@ -59,11 +59,17 @@
       </div>
       <div class="fifth-row">
         <input type="button" value="x^n" onclick="liveScreen('^')" />
+        <input type="button" value="√" onclick="liveScreen('√(')" title="Raíz cuadrada (tecla r)" />
+        <input type="button" value="%" onclick="liveScreen('%')" title="Porcentaje (tecla %%)" />
+        <input type="button" value="sin" onclick="liveScreen('sin(')" title="Seno (tecla s)" />
+        <input type="button" value="cos" onclick="liveScreen('cos(')" title="Coseno (tecla c)" />
+        <input type="button" value="tan" onclick="liveScreen('tan(')" title="Tangente (tecla t)" />
+        <input type="button" value="log" onclick="liveScreen('log(')" title="Logaritmo natural (tecla l)" />
+        <input type="button" value=")" onclick="liveScreen(')')" title="Cerrar paréntesis" />
       </div>
     </div>
   </div>
-  <script src="scripts/script.js">
-  </script>
+  <script src="scripts/script.js"></script>
 </body>
 
 </html>

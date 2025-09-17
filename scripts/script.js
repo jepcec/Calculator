@@ -7,11 +7,39 @@ const res = document.getElementById("result");
 const toast = document.getElementById("toast");
 
 function calculate(value) {
-  const sanitizedValue = value.replace(/\^/g, "**");
-  const calculatedValue = eval(sanitizedValue || null);
+  // Auto-close parentheses if needed
+  let open = (value.match(/\(/g) || []).length;
+  let close = (value.match(/\)/g) || []).length;
+  let toClose = open - close;
+  let fixedValue = value;
+  if (toClose > 0) {
+    fixedValue += ")".repeat(toClose);
+  }
+  // Remove spaces for robustness
+  fixedValue = fixedValue.replace(/\s+/g, "");
+  // Reemplazar el operador % por el operador módulo de JS
+  // y mantener el porcentaje para casos como 50% (sin operandos a la derecha)
+  let sanitizedValue = fixedValue.replace(/\^/g, "**");
+  // Primero, reemplazar los casos de porcentaje (número seguido de % y no seguido de un número)
+  sanitizedValue = sanitizedValue.replace(/([0-9.]+)%([^0-9]|$)/g, '($1/100)$2');
+  // Luego, reemplazar los casos de módulo (a % b)
+  sanitizedValue = sanitizedValue.replace(/([0-9.]+)%([0-9.]+)/g, '($1%$2)');
+  sanitizedValue = sanitizedValue
+    .replace(/√\(/g, 'Math.sqrt(')
+    .replace(/sin\(([^)]+)\)/g, 'Math.sin(($1)*Math.PI/180)')
+    .replace(/cos\(([^)]+)\)/g, 'Math.cos(($1)*Math.PI/180)')
+    .replace(/tan\(([^)]+)\)/g, 'Math.tan(($1)*Math.PI/180)')
+    .replace(/log\(/g, 'Math.log(');
 
-  if (isNaN(calculatedValue)) {
-    res.value = "Can't divide 0 with 0";
+  let calculatedValue;
+  try {
+    calculatedValue = eval(sanitizedValue || null);
+  } catch (e) {
+    calculatedValue = NaN;
+  }
+
+  if (isNaN(calculatedValue) || sanitizedValue.match(/\(\)/)) {
+    res.value = "Error";
     setTimeout(() => {
       res.value = "";
     }, 1300);
@@ -50,63 +78,44 @@ document.addEventListener("keydown", keyboardInputHandler);
 
 //function to handle keyboard inputs
 function keyboardInputHandler(e) {
-  // to fix the default behavior of browser,
-  // enter and backspace were causing undesired behavior when some key was already in focus.
   e.preventDefault();
-  //grabbing the liveScreen
-
   //numbers
-  if (e.key === "0") {
-    res.value += "0";
-  } else if (e.key === "1") {
-    res.value += "1";
-  } else if (e.key === "2") {
-    res.value += "2";
-  } else if (e.key === "3") {
-    res.value += "3";
-  } else if (e.key === "4") {
-    res.value += "4";
-  } else if (e.key === "5") {
-    res.value += "5";
-  } else if (e.key === "6") {
-    res.value += "6";
-  } else if (e.key === "7") {
-    res.value += "7";
-  } else if (e.key === "7") {
-    res.value += "7";
-  } else if (e.key === "8") {
-    res.value += "8";
-  } else if (e.key === "9") {
-    res.value += "9";
+  if (e.key >= "0" && e.key <= "9") {
+    res.value += e.key;
   }
-
   //operators
-  if (e.key === "+") {
-    res.value += "+";
-  } else if (e.key === "-") {
-    res.value += "-";
-  } else if (e.key === "*") {
-    res.value += "*";
-  } else if (e.key === "/") {
-    res.value += "/";
-  } else if (e.key === "^") {
-    res.value += "^";
+  if (["+", "-", "*", "/", "^"].includes(e.key)) {
+    res.value += e.key;
   }
-
   //decimal key
   if (e.key === ".") {
     res.value += ".";
   }
-
+  // scientific functions (keyboard shortcuts)
+  if (e.key === "r") { // sqrt
+    res.value += "√(";
+  }
+  if (e.key === "%") {
+    res.value += "%";
+  }
+  if (e.key === "s") { // sin
+    res.value += "sin(";
+  }
+  if (e.key === "c") { // cos
+    res.value += "cos(";
+  }
+  if (e.key === "t") { // tan
+    res.value += "tan(";
+  }
+  if (e.key === "l") { // log natural
+    res.value += "log(";
+  }
   //press enter to see result
   if (e.key === "Enter") {
-    calculate(result.value);
+    calculate(res.value);
   }
-
   //backspace for removing the last input
   if (e.key === "Backspace") {
-    const resultInput = res.value;
-    //remove the last element in the string
-    res.value = resultInput.substring(0, res.value.length - 1);
+    res.value = res.value.substring(0, res.value.length - 1);
   }
 }
